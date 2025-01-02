@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
+    "resolveJsonModule": true,
     "target": "ES6",
     "module": "commonjs",
     "outDir": "./dist",
     "rootDir": "./",
+    "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    
     "skipLibCheck": true
   },
-  "include": ["./**/*.ts", "firebaseConfig.js"],
+  "include": ["./**/*.ts", "src/**/*", "src/firebaseConfig.ts"],
   "exclude": ["node_modules"]
 }
