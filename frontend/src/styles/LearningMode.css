@@ -16,6 +16,15 @@
   margin-bottom: 1rem;
 }
 
+.question-image {
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+
 .options-list button {
   width: 100%;
   margin: 0.5rem 0;

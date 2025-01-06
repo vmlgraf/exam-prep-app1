@@ -9,6 +9,7 @@ interface Question {
   question: string;
   options: string[];
   correctAnswer: string;
+  image?: string;
 }
 
 function AdminCourseManagement() {
@@ -44,56 +45,49 @@ function AdminCourseManagement() {
           setQuestions(questionsData);
         }
       } catch (error) {
-        console.error('Error fetching course details:', error);
-        setUploadStatus('Failed to fetch course details.');
+        const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
+        console.error('Fehler beim Abrufen der Kursdetails:', errorMessage);
+        setUploadStatus('Fehler beim Abrufen der Kursdetails.');
       }
     };
 
     fetchCourseDetails();
   }, [courseId]);
 
-  
-const handleUploadFile = async () => {
+  const handleUploadFile = async () => {
     if (!file || !courseId) {
-      setUploadStatus('Please select a file and ensure a course is selected.');
+      setUploadStatus('Bitte wählen Sie eine Datei und einen Kurs aus.');
       return;
     }
-  
+
     try {
       const formData = new FormData();
       formData.append('file', file);
-  
+
       const response = await fetch(`http://localhost:5000/api/upload-questions/${courseId}`, {
         method: 'POST',
         body: formData,
       });
-  
+
       if (!response.ok) {
-        
         const errorData = await response.json();
-        setUploadStatus(`Upload failed: ${errorData.message}`);
+        setUploadStatus(`Fehler beim Hochladen: ${errorData.message}`);
         return;
       }
-  
-      
+
       const result = await response.json();
-      setUploadStatus('Questions uploaded successfully!');
+      setUploadStatus('Fragen erfolgreich hochgeladen!');
       setQuestions((prev) => [...prev, ...result.questions]);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error('Error uploading file:', error.message);
-        setUploadStatus('Upload failed. Please try again.');
-      } else {
-        console.error('Unknown error occurred:', error);
-        setUploadStatus('An unexpected error occurred. Please try again.');
-      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
+      console.error('Fehler beim Hochladen der Datei:', errorMessage);
+      setUploadStatus('Fehler beim Hochladen. Bitte versuchen Sie es erneut.');
     }
   };
-  
 
   const handleAddQuestion = async () => {
     if (!newQuestion.trim() || newOptions.some((opt) => !opt.trim()) || !newCorrectAnswer.trim()) {
-      alert('Please provide a valid question, options, and a correct answer.');
+      alert('Bitte geben Sie eine gültige Frage, Optionen und eine richtige Antwort ein.');
       return;
     }
 
@@ -109,33 +103,34 @@ const handleUploadFile = async () => {
       setNewQuestion('');
       setNewOptions(['', '', '', '']);
       setNewCorrectAnswer('');
-      alert('Question added successfully!');
+      alert('Frage erfolgreich hinzugefügt!');
     } catch (error) {
-      console.error('Error adding question:', error);
-      alert('Failed to add question.');
+      const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
+      console.error('Fehler beim Hinzufügen der Frage:', errorMessage);
+      alert('Fehler beim Hinzufügen der Frage.');
     }
   };
 
   return (
     <div className="admin-course-container">
       <header>
-        <h1>Course Management</h1>
-        <p><strong>Course:</strong> {courseTitle}</p>
-        <p><strong>Description:</strong> {courseDescription}</p>
+        <h1>Kursmanagement</h1>
+        <p><strong>Kurs:</strong> {courseTitle}</p>
+        <p><strong>Beschreibung:</strong> {courseDescription}</p>
       </header>
 
       <section className="upload-section">
-        <h2>Upload Questions</h2>
+        <h2>Fragen hochladen</h2>
         <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-        <button onClick={handleUploadFile}>Upload</button>
+        <button onClick={handleUploadFile}>Hochladen</button>
         {uploadStatus && <p className="upload-status">{uploadStatus}</p>}
       </section>
 
       <section className="manual-add-section">
-        <h2>Add New Question</h2>
+        <h2>Neue Frage hinzufügen</h2>
         <input
           type="text"
-          placeholder="Question"
+          placeholder="Frage"
           value={newQuestion}
           onChange={(e) => setNewQuestion(e.target.value)}
         />
@@ -154,25 +149,28 @@ const handleUploadFile = async () => {
         ))}
         <input
           type="text"
-          placeholder="Correct Answer"
+          placeholder="Richtige Antwort"
           value={newCorrectAnswer}
           onChange={(e) => setNewCorrectAnswer(e.target.value)}
         />
-        <button onClick={handleAddQuestion}>Add Question</button>
+        <button onClick={handleAddQuestion}>Frage hinzufügen</button>
       </section>
 
       <section className="questions-section">
-        <h2>Existing Questions</h2>
+        <h2>Vorhandene Fragen</h2>
         <ul>
           {questions.map((question) => (
             <li key={question.id}>
               <p>{question.question}</p>
+              {question.image && (
+                <img src={`data:image/png;base64,${question.image}`} alt="Frage-Bild" />
+              )}
               <ul>
                 {question.options.map((option, index) => (
                   <li key={index}>{option}</li>
                 ))}
               </ul>
-              <p><strong>Correct Answer:</strong> {question.correctAnswer}</p>
+              <p><strong>Richtige Antwort:</strong> {question.correctAnswer}</p>
             </li>
           ))}
         </ul>
