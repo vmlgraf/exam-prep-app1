@@ -61,3 +61,8 @@ ul {
   justify-content: space-between;
   align-items: center;
 }
+
+.question-item img {
+  max-width: 200px;
+  margin: 10px 0;
+}

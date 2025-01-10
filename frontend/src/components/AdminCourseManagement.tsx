@@ -9,7 +9,7 @@ interface Question {
   question: string;
   options: string[];
   correctAnswer: string;
-  image?: string;
+  imageUrl?: string; // URL des Bildes
 }
 
 function AdminCourseManagement() {
@@ -17,11 +17,11 @@ function AdminCourseManagement() {
   const [courseTitle, setCourseTitle] = useState<string>('');
   const [courseDescription, setCourseDescription] = useState<string>('');
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [file, setFile] = useState<File | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<string>('');
   const [newQuestion, setNewQuestion] = useState<string>('');
   const [newOptions, setNewOptions] = useState<string[]>(['', '', '', '']);
   const [newCorrectAnswer, setNewCorrectAnswer] = useState<string>('');
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<string>('');
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -45,9 +45,7 @@ function AdminCourseManagement() {
           setQuestions(questionsData);
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
-        console.error('Fehler beim Abrufen der Kursdetails:', errorMessage);
-        setUploadStatus('Fehler beim Abrufen der Kursdetails.');
+        console.error('Error fetching course details:', error);
       }
     };
 
@@ -56,7 +54,7 @@ function AdminCourseManagement() {
 
   const handleUploadFile = async () => {
     if (!file || !courseId) {
-      setUploadStatus('Bitte wählen Sie eine Datei und einen Kurs aus.');
+      setUploadStatus('Bitte wählen Sie eine Datei aus.');
       return;
     }
 
@@ -70,44 +68,40 @@ function AdminCourseManagement() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        setUploadStatus(`Fehler beim Hochladen: ${errorData.message}`);
-        return;
+        throw new Error('Fehler beim Hochladen der Datei');
       }
 
       const result = await response.json();
-      setUploadStatus('Fragen erfolgreich hochgeladen!');
       setQuestions((prev) => [...prev, ...result.questions]);
+      setUploadStatus('Datei erfolgreich hochgeladen!');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
-      console.error('Fehler beim Hochladen der Datei:', errorMessage);
-      setUploadStatus('Fehler beim Hochladen. Bitte versuchen Sie es erneut.');
+      console.error('Fehler beim Hochladen:', error);
+      setUploadStatus('Fehler beim Hochladen.');
     }
   };
 
   const handleAddQuestion = async () => {
-    if (!newQuestion.trim() || newOptions.some((opt) => !opt.trim()) || !newCorrectAnswer.trim()) {
-      alert('Bitte geben Sie eine gültige Frage, Optionen und eine richtige Antwort ein.');
+    if (!newQuestion || newOptions.some((opt) => !opt) || !newCorrectAnswer) {
+      alert('Bitte füllen Sie alle Felder aus.');
       return;
     }
 
     try {
       const questionData = {
-        question: newQuestion.trim(),
-        options: newOptions.map((opt) => opt.trim()),
-        correctAnswer: newCorrectAnswer.trim(),
+        question: newQuestion,
+        options: newOptions,
+        correctAnswer: newCorrectAnswer,
       };
 
       const questionRef = await addDoc(collection(db, `courses/${courseId}/questions`), questionData);
       setQuestions((prev) => [...prev, { id: questionRef.id, ...questionData }]);
+
       setNewQuestion('');
       setNewOptions(['', '', '', '']);
       setNewCorrectAnswer('');
       alert('Frage erfolgreich hinzugefügt!');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
-      console.error('Fehler beim Hinzufügen der Frage:', errorMessage);
-      alert('Fehler beim Hinzufügen der Frage.');
+      console.error('Fehler beim Hinzufügen:', error);
     }
   };
 
@@ -115,19 +109,25 @@ function AdminCourseManagement() {
     <div className="admin-course-container">
       <header>
         <h1>Kursmanagement</h1>
-        <p><strong>Kurs:</strong> {courseTitle}</p>
-        <p><strong>Beschreibung:</strong> {courseDescription}</p>
+        <p>
+          <strong>Kurs:</strong> {courseTitle}
+        </p>
+        <p>
+          <strong>Beschreibung:</strong> {courseDescription}
+        </p>
       </header>
 
-      <section className="upload-section">
-        <h2>Fragen hochladen</h2>
+      {/* Datei-Upload */}
+      <section>
+        <h2>Excel-Datei hochladen</h2>
         <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
         <button onClick={handleUploadFile}>Hochladen</button>
-        {uploadStatus && <p className="upload-status">{uploadStatus}</p>}
+        {uploadStatus && <p>{uploadStatus}</p>}
       </section>
 
-      <section className="manual-add-section">
-        <h2>Neue Frage hinzufügen</h2>
+      {/* Manuelles Hinzufügen */}
+      <section>
+        <h2>Frage hinzufügen</h2>
         <input
           type="text"
           placeholder="Frage"
@@ -153,24 +153,31 @@ function AdminCourseManagement() {
           value={newCorrectAnswer}
           onChange={(e) => setNewCorrectAnswer(e.target.value)}
         />
-        <button onClick={handleAddQuestion}>Frage hinzufügen</button>
+        <button onClick={handleAddQuestion}>Hinzufügen</button>
       </section>
 
+      {/* Fragen anzeigen */}
       <section className="questions-section">
-        <h2>Vorhandene Fragen</h2>
+        <h2>Fragen</h2>
         <ul>
           {questions.map((question) => (
             <li key={question.id}>
               <p>{question.question}</p>
-              {question.image && (
-                <img src={`data:image/png;base64,${question.image}`} alt="Frage-Bild" />
+              {question.imageUrl && (
+                <img
+                  src={question.imageUrl}
+                  alt="Bild zur Frage"
+                  style={{ maxWidth: '100%', maxHeight: '300px' }}
+                />
               )}
               <ul>
                 {question.options.map((option, index) => (
                   <li key={index}>{option}</li>
                 ))}
               </ul>
-              <p><strong>Richtige Antwort:</strong> {question.correctAnswer}</p>
+              <p>
+                <strong>Richtige Antwort:</strong> {question.correctAnswer}
+              </p>
             </li>
           ))}
         </ul>

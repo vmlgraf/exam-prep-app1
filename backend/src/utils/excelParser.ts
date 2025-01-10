@@ -1,57 +1,77 @@
-import * as XLSX from 'xlsx';
-import { v4 as uuidv4 } from 'uuid'; // For generating unique file names
+import ExcelJS from 'exceljs';
+import { v4 as uuidv4 } from 'uuid';
+import { bucket } from '../adminConfig'; // Firebase Storage
 
 interface ParsedQuestion {
   question: string;
   options: string[];
   correctAnswer: string;
-  imageFile?: File;
+  imageUrl?: string;
 }
 
-// export const parseExcelFile = (file: File): Promise<ParsedQuestion[]> => {
-//   return new Promise((resolve, reject) => {
-//     const reader = new FileReader();
-//     reader.onload = (e) => {
-//       try {
-//         const workbook = XLSX.read(e.target?.result, { type: 'binary' });
-//         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-//         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as string[][];
+export const parseExcelFileWithImages = async (fileBuffer: Buffer): Promise<ParsedQuestion[]> => {
+  try {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(fileBuffer);
 
-//         const questions: ParsedQuestion[] = rows.slice(1).map((row) => ({
-//           question: row[0]?.trim() || '',
-//           options: [row[1]?.trim(), row[2]?.trim(), row[3]?.trim(), row[4]?.trim()].filter(Boolean),
-//           correctAnswer: row[5]?.trim() || '',
-//           imageFile: row[6] ? new File([row[6]], `${uuidv4()}.png`, { type: 'image/png' }) : undefined, // If image exists
-//         }));
+    const worksheet = workbook.worksheets[0];
+    const parsedQuestions: ParsedQuestion[] = [];
 
-//         resolve(questions);
-//       } catch (error) {
-//         reject(error);
-//       }
-//     };
-//     reader.onerror = (error) => reject(error);
-//     reader.readAsBinaryString(file);
-//   });
-// };
+    for (let i = 2; i <= worksheet.rowCount; i++) {
+      const row = worksheet.getRow(i);
 
-export const parseExcelFile = async (file: File): Promise<ParsedQuestion[]> => {
-  const workbook = XLSX.read(file, { type: 'buffer' });
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as string[][];
-  const filteredRows = rows.filter(row => row.length > 0);
+      let questionText = row.getCell(1).value?.toString().trim() || '';
+      const options = [
+        row.getCell(2).value?.toString().trim() || '',
+        row.getCell(3).value?.toString().trim() || '',
+        row.getCell(4).value?.toString().trim() || '',
+        row.getCell(5).value?.toString().trim() || '',
+      ].filter(Boolean);
+      const correctAnswer = row.getCell(6).value?.toString().trim() || '';
+      const imageCell = row.getCell(7).value; // Assuming column 7 contains the image as base64 or Buffer
 
-  const questions = filteredRows.map(row => {
-    // Need to figure out how to get the image out of a cell in xlsx file
-    // https://github.com/SheetJS/sheetjs/issues/1492
-    let imageFile = '?';
+      if (!questionText || options.length < 4 || !['A', 'B', 'C', 'D'].includes(correctAnswer)) {
+        console.warn(`Skipping invalid row ${i}:`, { questionText, options, correctAnswer });
+        continue;
+      }
 
-    return {
-      question: row[0],
-      options: row.slice(1, 5),
-      correctAnswer: row[5],
-      imageFile: undefined
+      let imageUrl = '';
+      if (imageCell) {
+        const imageBuffer = Buffer.isBuffer(imageCell)
+          ? imageCell
+          : Buffer.from(imageCell.toString(), 'base64'); // Handle base64 or buffer
+        const destination = `questions/images/${uuidv4()}.png`;
+        imageUrl = await uploadImageToStorage(imageBuffer, destination);
+      }
+
+      parsedQuestions.push({
+        question: questionText,
+        options,
+        correctAnswer,
+        imageUrl,
+      });
     }
-  });
 
-  return questions;
-}
+    if (parsedQuestions.length === 0) {
+      throw new Error('No valid questions found in the Excel file.');
+    }
+
+    return parsedQuestions;
+  } catch (error) {
+    console.error('Error parsing Excel file:', error);
+    throw error;
+  }
+};
+
+// Function to upload images to Firebase Storage
+const uploadImageToStorage = async (imageBuffer: Buffer, destination: string): Promise<string> => {
+  try {
+    const file = bucket.file(destination);
+    await file.save(imageBuffer, { contentType: 'image/png' });
+    console.log(`File uploaded to ${destination}`);
+    return `https://storage.googleapis.com/${bucket.name}/${destination}`;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw new Error('Failed to upload image to Firebase Storage');
+  }
+};

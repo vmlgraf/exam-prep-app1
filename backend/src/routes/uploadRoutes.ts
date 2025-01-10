@@ -1,54 +1,53 @@
 import express from 'express';
 import multer from 'multer';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { parseExcelFile } from '../utils/excelParser';
+import { parseExcelFileWithImages } from '../utils/excelParser'; // Verwende den Parser
 import { db } from '../adminConfig';
-import { collection, addDoc } from 'firebase/firestore';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/upload-questions/:courseId', upload.single('file'), async (req, res) => {
+router.post('/upload-questions/:courseId', upload.single('file'), async (req, res): Promise<void> => {
   const { courseId } = req.params;
 
-  if (!req.file) {
-    res.status(400).json({ message: 'No file uploaded.' });
+  if (!req.file || !courseId) {
+    res.status(400).json({ error: 'Course ID and file are required.' });
     return;
   }
 
   try {
-    const questions = await parseExcelFile(req.file.buffer); // Updated to pass buffer directly
+    const fileBuffer = req.file.buffer;
 
-    const storage = getStorage();
-    const courseQuestionsRef = collection(db, `courses/${courseId}/questions`);
-    const uploadedQuestions = [];
+    // Parse the Excel file
+    const questions = await parseExcelFileWithImages(fileBuffer);
 
-    for (const question of questions) {
-      let imageUrl = '';
-      if (question.imageFile) {
-        const imageRef = ref(storage, `courses/${courseId}/images/${question.imageFile.name}`);
-        const snapshot = await uploadBytes(imageRef, question.imageFile); // Upload image buffer
-        imageUrl = await getDownloadURL(snapshot.ref); // Get download URL
-      }
-
-      const questionDoc = {
-        question: question.question,
-        options: question.options,
-        correctAnswer: question.correctAnswer,
-        imageUrl,
-      };
-
-      const docRef = await addDoc(courseQuestionsRef, questionDoc);
-      uploadedQuestions.push({ id: docRef.id, ...questionDoc });
+    if (questions.length === 0) {
+      res.status(400).json({ error: 'No valid questions found in the uploaded file.' });
+      return;
     }
 
+    const courseRef = db.collection('courses').doc(courseId);
+    const questionsRef = courseRef.collection('questions');
+
+    // Save each question to Firestore
+    const questionUploadPromises = questions.map(async (question) => {
+      const { question: questionText, options, correctAnswer, imageUrl } = question;
+      return questionsRef.add({
+        question: questionText,
+        options,
+        correctAnswer,
+        imageUrl: imageUrl || null,
+      });
+    });
+
+    await Promise.all(questionUploadPromises);
+
     res.status(200).json({
-      message: 'Questions uploaded successfully!',
-      questions: uploadedQuestions,
+      message: 'Questions and images uploaded successfully!',
+      questions,
     });
   } catch (error) {
-    console.error('Error processing file:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('Error processing upload:', error);
+    res.status(500).json({ error: 'Failed to process questions and images.' });
   }
 });
 

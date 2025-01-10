@@ -1,13 +1,13 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
-import { parseExcelFile } from '../utils/excelParser';
+import { parseExcelFileWithImages } from '../utils/excelParser'; // Importiere die korrekte Funktion
 import { db } from '../adminConfig';
 import { checkAdmin } from '../middleware/authMiddleware';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/api/upload-questions/:courseId', checkAdmin, upload.single('file'), async (req, res) => {
+router.post('/api/upload-questions/:courseId', checkAdmin, upload.single('file'), async (req: Request, res: Response) => {
   const { courseId } = req.params;
   const file = req.file;
 
@@ -17,11 +17,21 @@ router.post('/api/upload-questions/:courseId', checkAdmin, upload.single('file')
   }
 
   try {
-    const questions = await parseExcelFile(file.buffer);
+    // Buffer bleibt Buffer, keine Konvertierung zu ArrayBuffer
+    const buffer = file.buffer;
 
-    const invalidQuestions = questions.filter((q) => !q.question || q.options.length < 1 || !q.correctAnswer);
+    // Übergib den Buffer direkt an die Funktion
+    const questions = await parseExcelFileWithImages(buffer);
+
+    const invalidQuestions = questions.filter(
+      (q: { question: string; options: string[]; correctAnswer: string }) =>
+        !q.question || q.options.length < 1 || !q.correctAnswer
+    );
     if (invalidQuestions.length > 0) {
-      res.status(400).json({ error: 'Some questions are invalid. Each question must have at least one option and a correct answer.' });
+      res.status(400).json({
+        error:
+          'Some questions are invalid. Each question must have at least one option and a correct answer.',
+      });
       return;
     }
 
