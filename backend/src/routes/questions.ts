@@ -1,16 +1,11 @@
-import { Router, Request, Response } from 'express';
+import express from 'express';
 import { db } from '../adminConfig';
 
-const router = Router();
+const router = express.Router();
 
-// Route: Get all questions for a specific course
-router.get('/:courseId/questions', async (req: Request, res: Response): Promise<void> => {
+// Fetch all questions for a specific course
+router.get('/courses/:courseId/questions', async (req, res): Promise<void> => {
   const { courseId } = req.params;
-
-  if (!courseId) {
-    res.status(400).json({ error: 'Course ID is required.' });
-    return;
-  }
 
   try {
     const questionsRef = db.collection('courses').doc(courseId).collection('questions');
@@ -30,6 +25,27 @@ router.get('/:courseId/questions', async (req: Request, res: Response): Promise<
   } catch (error) {
     console.error('Error fetching questions:', error);
     res.status(500).json({ error: 'Failed to fetch questions.' });
+  }
+});
+
+// Update the status of a question (correct/incorrect)
+router.patch('/courses/:courseId/questions/:questionId', async (req, res) => {
+  const { courseId, questionId } = req.params;
+  const { status } = req.body;
+
+  if (!['correct', 'incorrect'].includes(status)) {
+    res.status(400).json({ error: 'Invalid status value. Must be "correct" or "incorrect".' });
+    return;
+  }
+
+  try {
+    const questionRef = db.collection('courses').doc(courseId).collection('questions').doc(questionId);
+
+    await questionRef.update({ lastStatus: status });
+    res.status(200).json({ message: 'Question status updated successfully.' });
+  } catch (error) {
+    console.error('Error updating question status:', error);
+    res.status(500).json({ error: 'Failed to update question status.' });
   }
 });
 

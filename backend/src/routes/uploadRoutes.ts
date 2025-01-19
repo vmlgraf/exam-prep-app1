@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { parseExcelFileWithImages } from '../utils/excelParser'; // Verwende den Parser
+import { parseExcelFileWithImages } from '../utils/excelParser'; // Parser für Excel-Dateien
 import { db } from '../adminConfig';
 
 const router = express.Router();
@@ -17,10 +17,10 @@ router.post('/upload-questions/:courseId', upload.single('file'), async (req, re
   try {
     const fileBuffer = req.file.buffer;
 
-    // Parse the Excel file
+    // Parse das Excel-File
     const questions = await parseExcelFileWithImages(fileBuffer);
 
-    if (questions.length === 0) {
+    if (!questions || questions.length === 0) {
       res.status(400).json({ error: 'No valid questions found in the uploaded file.' });
       return;
     }
@@ -28,9 +28,15 @@ router.post('/upload-questions/:courseId', upload.single('file'), async (req, re
     const courseRef = db.collection('courses').doc(courseId);
     const questionsRef = courseRef.collection('questions');
 
-    // Save each question to Firestore
+    // Jede Frage speichern
     const questionUploadPromises = questions.map(async (question) => {
+      // Überprüfung, ob Felder korrekt sind
       const { question: questionText, options, correctAnswer, imageUrl } = question;
+
+      if (!questionText || options.length < 4 || !correctAnswer) {
+        throw new Error('Invalid question format in the file.');
+      }
+
       return questionsRef.add({
         question: questionText,
         options,

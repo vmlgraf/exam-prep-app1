@@ -20,17 +20,17 @@ export const parseExcelFileWithImages = async (fileBuffer: Buffer): Promise<Pars
     for (let i = 2; i <= worksheet.rowCount; i++) {
       const row = worksheet.getRow(i);
 
-      let questionText = row.getCell(1).value?.toString().trim() || '';
+      const questionText = row.getCell(1).value?.toString().trim() || '';
       const options = [
         row.getCell(2).value?.toString().trim() || '',
         row.getCell(3).value?.toString().trim() || '',
         row.getCell(4).value?.toString().trim() || '',
         row.getCell(5).value?.toString().trim() || '',
-      ].filter(Boolean);
+      ].filter((opt) => opt.length > 0); // Nur nicht-leere Optionen
       const correctAnswer = row.getCell(6).value?.toString().trim() || '';
-      const imageCell = row.getCell(7).value; // Assuming column 7 contains the image as base64 or Buffer
+      const imageCell = row.getCell(7).value;
 
-      if (!questionText || options.length < 4 || !['A', 'B', 'C', 'D'].includes(correctAnswer)) {
+      if (!questionText || options.length !== 4 || !['A', 'B', 'C', 'D'].includes(correctAnswer)) {
         console.warn(`Skipping invalid row ${i}:`, { questionText, options, correctAnswer });
         continue;
       }
@@ -39,7 +39,7 @@ export const parseExcelFileWithImages = async (fileBuffer: Buffer): Promise<Pars
       if (imageCell) {
         const imageBuffer = Buffer.isBuffer(imageCell)
           ? imageCell
-          : Buffer.from(imageCell.toString(), 'base64'); // Handle base64 or buffer
+          : Buffer.from(imageCell.toString(), 'base64');
         const destination = `questions/images/${uuidv4()}.png`;
         imageUrl = await uploadImageToStorage(imageBuffer, destination);
       }
@@ -62,6 +62,8 @@ export const parseExcelFileWithImages = async (fileBuffer: Buffer): Promise<Pars
     throw error;
   }
 };
+
+
 
 // Function to upload images to Firebase Storage
 const uploadImageToStorage = async (imageBuffer: Buffer, destination: string): Promise<string> => {

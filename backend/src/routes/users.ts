@@ -32,20 +32,21 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 });
 
 
-router.get('/profile/:uid', async (req: Request, res: Response): Promise<void> => {
+// Backend: user.ts
+router.get('/:uid', async (req: Request, res: Response): Promise<void> => {
   const { uid } = req.params;
 
   try {
-    const userDoc = await db.collection('users').doc(uid).get();
+    const userDoc = await db.collection('users').doc(uid).get(); // Firestore-Dokument abrufen
     if (!userDoc.exists) {
-      res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: 'User not found' }); // Benutzer nicht gefunden
       return;
     }
 
-    res.status(200).json({ user: userDoc.data() });
+    res.status(200).json(userDoc.data()); // Benutzerdaten zurückgeben
   } catch (error) {
     console.error('Error fetching user profile:', error);
-    res.status(500).json({ error: 'Failed to fetch user profile' });
+    res.status(500).json({ error: 'Failed to fetch user profile' }); // Serverfehler
   }
 });
 
