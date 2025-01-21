@@ -10,6 +10,7 @@ import coursesRoutes from './routes/courses';
 import questionsRoutes from './routes/questions';
 import userRoutes from './routes/users';
 import uploadRoutes from './routes/uploadRoutes';
+import userStatsRoutes from './routes/userStats';
 
 // Firebase-Initialisierung
 if (!admin.apps.length) {
@@ -30,6 +31,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routen
 app.use('/api/users', userRoutes);
+app.use('/api/stats', userStatsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/courses', coursesRoutes);
 app.use('/api', questionsRoutes);

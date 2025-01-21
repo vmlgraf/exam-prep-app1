@@ -87,7 +87,7 @@ router.patch('/:courseId', async (req: Request, res: Response): Promise<void> =>
   }
 });
 
-// Kurs löschen (DELETE)
+// Kurs löschen
 router.delete('/:courseId', async (req: Request, res: Response): Promise<void> => {
   const { courseId } = req.params;
 

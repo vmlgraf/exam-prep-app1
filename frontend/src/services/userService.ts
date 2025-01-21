@@ -1,4 +1,6 @@
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import api from './api';
+import { db } from '../firebaseConfig';
 
 // Benutzer registrieren
 export const registerUser = async (email: string, password: string, name: string, birthday: string) => {
@@ -21,3 +23,33 @@ export const checkIfAdmin = async (userId: string): Promise<boolean> => {
     return false;
   }
 };
+
+// Prüft, ob ein Benutzerprofil existiert
+export const checkUserProfile = async (uid: string): Promise<boolean> => {
+  try {
+    const userDoc = await getDoc(doc(db, 'users', uid));
+    return userDoc.exists();
+  } catch (err) {
+    console.error('Fehler beim Überprüfen des Benutzerprofils:', err);
+    return false;
+  }
+};
+
+// Erstellt ein neues Benutzerprofil
+export const createUserProfile = async (uid: string, email: string, name: string): Promise<void> => {
+  try {
+    const userDocRef = doc(db, 'users', uid);
+    await setDoc(userDocRef, {
+      email,
+      name,
+      birthday: null,
+      role: 'user',
+      createdAt: new Date(),
+    });
+  } catch (err) {
+    console.error('Fehler beim Erstellen des Benutzerprofils:', err);
+    throw err;
+  }
+};
+
+

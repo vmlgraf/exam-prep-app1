@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { getProfile } from '../services/userService';
 import { useNavigate } from 'react-router-dom';
+import { fetchUserCourseStats } from '../services/userStatsService';
 import '../styles/Profile.css';
 
 interface UserProfile {
@@ -10,11 +11,21 @@ interface UserProfile {
   birthday?: string;
 }
 
+interface CourseStats {
+  courseId: string;
+  courseTitle: string;
+  points: number;
+  badges: string[];
+  level: number;
+}
+
 function Profile() {
   const { isAuthenticated, userId, isLoading, logout } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [courseStats, setCourseStats] = useState<CourseStats[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,19 +42,24 @@ function Profile() {
       return;
     }
 
-    const fetchProfile = async () => {
+    const fetchProfileData = async () => {
       try {
         const userProfile = await getProfile(userId);
+        const courses = await fetchUserCourseStats(userId);
+
+        console.log('Fetched Course Stats:', courses);
+
         setProfile(userProfile);
+        setCourseStats(courses);
       } catch (err) {
-        console.error('Profil konnte nicht geladen werden:', err);
+        console.error('Fehler beim Laden der Profildaten:', err);
         setError('Profil konnte nicht geladen werden.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
+    fetchProfileData();
   }, [isAuthenticated, userId]);
 
   const handleLogout = async () => {
@@ -72,7 +88,24 @@ function Profile() {
         <p>Keine Profildaten verfügbar.</p>
       )}
 
-      {/* Abmelde-Button unten */}
+      <div className="user-stats">
+        <h3>Deine Erfolge:</h3>
+        {courseStats.length > 0 ? (
+            courseStats.map((course) => (
+              <div key={course.courseId} className="course-item">
+                <h4>Kurs: {course.courseTitle}</h4>
+                <p>Punkte: {course.points}</p>
+                <p>Level: {course.level}</p>
+                <p>
+                  Abzeichen: {course.badges.length > 0 ? course.badges.join(', ') : 'Keine Abzeichen'}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p>Keine Statistiken verfügbar.</p>
+          )}
+      </div>
+
       <div className="logout-container">
         <button onClick={handleLogout} className="logout-button">
           Abmelden

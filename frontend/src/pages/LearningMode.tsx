@@ -1,23 +1,40 @@
 import { useParams, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import useLearningMode from '../hooks/useLearningMode';
 import '../styles/LearningMode.css';
 
 const LearningMode = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const location = useLocation();
+  const { userId } = useAuth();
   const mode = location.state?.mode || 'learn';
 
-  const { questions, currentQuestionIndex, feedback, handleAnswer, timeLeft } =
-    useLearningMode(courseId!, mode);
+  const { questions, currentQuestionIndex, feedback, handleAnswer, timeLeft, showSummary, correctAnswersCount ,loadingQuestions ,handleModeCompletion } =
+    useLearningMode(courseId!, mode, userId!);
 
-    console.log('Modus:', mode);
-    console.log('Falsch beantwortete Fragen:', questions);
+    if (loadingQuestions) {
+      return <p>Lade Fragen...</p>;
+    }
 
   if (!questions.length) {
     return mode === 'repeat' ? (
       <p>Keine falsch beantworteten Fragen mehr vorhanden. 🎉</p>
     ) : (
       <p>Keine Fragen verfügbar.</p>
+    );
+  }
+
+  if (showSummary && mode === 'exam') {
+    return (
+      <div className="summary-container">
+        <h2>Prüfungsmodus abgeschlossen 🎉</h2>
+        <p>
+          Du hast {correctAnswersCount} von {questions.length} Fragen richtig beantwortet.
+        </p>
+        <button onClick={() => handleModeCompletion('exam')}>
+          Zurück zur Kurs Detail Seite
+        </button>
+      </div>
     );
   }
 
@@ -45,7 +62,7 @@ const LearningMode = () => {
           </button>
         ))}
       </div>
-      {feedback && (
+      {feedback && mode !== 'exam' && (
         <p className={`feedback ${feedback.isCorrect ? 'correct' : 'incorrect'}`}>
           {feedback.message}
         </p>

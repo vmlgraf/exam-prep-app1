@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { fetchCourseDetails } from '../services/courseService';
+import { useAuth } from '../hooks/useAuth';
 import '../styles/CourseDetail.css';
 
 function CourseDetail() {
@@ -9,6 +10,9 @@ function CourseDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const message = location.state?.message;
 
   useEffect(() => {
     if (!courseId) {
@@ -41,16 +45,19 @@ function CourseDetail() {
 
   return (
     <div className="course-detail-container">
+      {message && <div className='info-message'>{message}</div>}
       {course ? (
         <>
           <h2>{course.title}</h2>
           <p>{course.description}</p>
-          <div className="mode-selection">
+          {isAuthenticated && (
+            <div className="mode-selection">
             <h3>Select a learning mode:</h3>
             <button onClick={() => handleModeSelection('practice')}>Practice Mode</button>
             <button onClick={() => handleModeSelection('exam')}>Exam Mode</button>
             <button onClick={() => handleModeSelection('repeat')}>Repeat Mode</button>
           </div>
+          )}
         </>
       ) : (
         <p>No course data available.</p>

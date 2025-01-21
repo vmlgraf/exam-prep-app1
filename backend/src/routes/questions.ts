@@ -49,4 +49,45 @@ router.patch('/courses/:courseId/questions/:questionId', async (req, res) => {
   }
 });
 
+// Statistik: Prozentsatz der korrekten Antworten eines Kurses
+router.get('/courses/:courseId/stats', async (req, res) => {
+  const { courseId } = req.params;
+
+  if (!courseId) {
+    res.status(400).json({ error: 'Course ID is required.' });
+    return;
+  }
+
+  try {
+    const questionsRef = db.collection('courses').doc(courseId).collection('questions');
+    const questionsSnapshot = await questionsRef.get();
+
+    if (questionsSnapshot.empty) {
+      res.status(404).json({ error: 'No questions found for this course.' });
+      return;
+    }
+
+    const totalQuestions = questionsSnapshot.size;
+    let correctAnswersCount = 0;
+
+    questionsSnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.lastStatus === 'correct') {
+        correctAnswersCount += 1;
+      }
+    });
+
+    const percentage = ((correctAnswersCount / totalQuestions) * 100).toFixed(2);
+
+    res.status(200).json({
+      totalQuestions,
+      correctAnswersCount,
+      percentage,
+    });
+  } catch (error) {
+    console.error('Error fetching course stats:', error);
+    res.status(500).json({ error: 'Failed to fetch course stats.' });
+  }
+});
+
 export default router;

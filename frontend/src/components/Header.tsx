@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth'; // Auth-Hook importieren
 import { checkIfAdmin } from '../services/userService'; // Admin-Prüfung
@@ -7,6 +7,7 @@ import './styles/Header.css';
 function Header() {
   const { isAuthenticated, userId } = useAuth(); // Authentifizierungsstatus und User-ID abrufen
   const [isAdmin, setIsAdmin] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchAdminStatus = async () => {
@@ -18,6 +19,9 @@ function Header() {
 
     fetchAdminStatus();
   }, [userId]);
+
+  const shouldShowAuthButton = !isAuthenticated;
+  const isLoginPage = location.pathname === '/login';
 
   return (
     <header className="header">
@@ -46,10 +50,12 @@ function Header() {
           )}
         </ul>
       </nav>
-      {!isAuthenticated && (
+      {shouldShowAuthButton && (
         <div className="auth-button">
-          <Link to="/login">
-            <button className="button-login">Anmelden</button>
+          <Link to={isLoginPage ? '/register' : '/login'}>
+            <button className='button-register'>
+              {isLoginPage ? 'Registrieren' : 'Anmelden'}
+            </button>
           </Link>
         </div>
       )}
