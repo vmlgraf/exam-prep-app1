@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { collection, doc, getDoc, getDocs, addDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import '../styles/AdminCourseManagement.css';
+import { deleteQuestion } from '../services/questionService';
 
 interface Question {
   id: string;
@@ -50,7 +51,7 @@ function AdminCourseManagement() {
         console.error('Error fetching course details:', error);
       }
     };
-
+    window.scrollTo(0, 0);
     fetchCourseDetails();
   }, [courseId]);
 
@@ -108,32 +109,45 @@ function AdminCourseManagement() {
     }
   };
 
+  const handleDeleteQuestion = async (questionId: string) => {
+    if (!window.confirm('Möchten Sie diese Frage wirklich löschen?')) return;
+  
+    try {
+      if (courseId) {
+        await deleteQuestion(courseId, questionId);
+        setQuestions((prevQuestions) => prevQuestions.filter((q) => q.id !== questionId));
+        alert('Frage erfolgreich gelöscht.');
+      }
+    } catch (error) {
+      console.error('Fehler beim Löschen der Frage:', error);
+      alert('Fehler beim Löschen der Frage.');
+    }
+  };
+
   return (
     <div className="admin-course-container">
       <header>
-        <h1>Manage Course</h1>
+        <h1>Kurse verwalten</h1>
         <p>
-          <strong>Course:</strong> {courseTitle}
+          <strong>Kurs:</strong> {courseTitle}
         </p>
         <p>
-          <strong>Description:</strong> {courseDescription}
+          <strong>Beschreibung:</strong> {courseDescription}
         </p>
       </header>
 
-      {/* Datei-Upload */}
       <section>
-        <h2>Upload Excel File</h2>
+        <h2>Excel File hochladen</h2>
         <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-        <button onClick={handleUploadFile}>Upload</button>
+        <button onClick={handleUploadFile}>Hochladen</button>
         {uploadStatus && <p>{uploadStatus}</p>}
       </section>
 
-      {/* Manuelles Hinzufügen */}
       <section>
-        <h2>Add Question</h2>
+        <h2>Frage hinzufügen</h2>
         <input
           type="text"
-          placeholder="Question"
+          placeholder="Frage"
           value={newQuestion}
           onChange={(e) => setNewQuestion(e.target.value)}
         />
@@ -152,18 +166,17 @@ function AdminCourseManagement() {
         ))}
         <input
           type="text"
-          placeholder="Correct Answer"
+          placeholder="Korrekte Antwort"
           value={newCorrectAnswer}
           onChange={(e) => setNewCorrectAnswer(e.target.value)}
         />
-        <button onClick={handleAddQuestion}>Add Question</button>
+        <button onClick={handleAddQuestion}>Frage hinzufügen</button>
       </section>
 
-      {/* Fragen anzeigen */}
       <section>
-        <h2>Questions</h2>
+        <h2>Frage Liste</h2>
         {questions.length === 0 ? (
-          <p>No questions available for this course.</p>
+          <p>Es sind keine Fragen in dem Kurs vorhanden.</p>
         ) : (
           <ul>
             {questions.map((question) => (
@@ -182,8 +195,11 @@ function AdminCourseManagement() {
                   ))}
                 </ul>
                 <p>
-                  <strong>Correct Answer:</strong> {question.correctAnswer}
+                  <strong>Korrekte Antwort:</strong> {question.correctAnswer}
                 </p>
+                <button onClick={() => handleDeleteQuestion(question.id)} className="delete-button">
+                  Frage löschen
+                </button>
               </li>
             ))}
           </ul>

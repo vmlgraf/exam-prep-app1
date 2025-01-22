@@ -52,38 +52,57 @@ function Register() {
 
   return (
     <div className="register-container">
-      <h2>Register</h2>
+      <div className='register-card'>
+      <h2>Registrieren</h2>
       {error && <p className="error-text">{error}</p>}
       {success && <p className="success-text">Registrierung erfolgreich!</p>}
-      <form autoComplete='on'>
-        <input
+      <form onSubmit={handleRegister} autoComplete='on'>
+        <div className='form-group'>
+          <label htmlFor="name">Name</label>
+          <input
           type="text"
+          is="name"
           placeholder="Name"
           onChange={(e) => setName(e.target.value)}
           value={name}
         />
-        <input
-          type="email"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-          value={password}
-        />
-        <input
-          type="date"
-          placeholder="Birthday"
-          onChange={(e) => setBirthday(e.target.value)}
-          value={birthday}
-        />
-        <button onClick={handleRegister} className="register-button">Register</button>
+        </div>
+        <div className="form-group">
+            <label htmlFor="email">E-Mail</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="E-Mail"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Passwort</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Passwort"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="birthday">Geburtsdatum</label>
+            <input
+              type="date"
+              id="birthday"
+              placeholder="Geburtsdatum"
+              onChange={(e) => setBirthday(e.target.value)}
+              value={birthday}
+            />
+          </div>
+          <button type="submit" onClick={handleRegister} className="register-button">Registrieren</button>
       </form>
-      <button onClick={handleGoogleRegister} className="oauth-button">Mit Google registrieren</button>
+      <div className="separator">oder</div>
+      <button onClick={handleGoogleRegister} className="google-login-button">Mit Google registrieren</button>
     </div>
+  </div>
   );
 }
 

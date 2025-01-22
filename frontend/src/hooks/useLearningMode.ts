@@ -22,6 +22,7 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
   const [correctAnswersCount, setCorrectAnswerCount] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
+  const [, setIsFeedbackVisible] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,6 +62,11 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
     loadQuestions();
   }, [courseId, mode]);
 
+  const getFormattedQuestion = (): string[] => {
+    if (!questions[currentQuestionIndex]) return [];
+    return parseQuestionText(questions[currentQuestionIndex].question);
+  };
+
   useEffect(() => {
     if (mode === 'exam' && timeLeft > 0 && !showSummary) {
       const timer = setInterval(() => {
@@ -94,10 +100,22 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
         await updatePoints(userId, courseId, 10);
       }
 
-      setFeedback({
-        message: isCorrect ? 'Richtig! 🎉' : `Falsch. Die richtige Antwort ist: ${correctOption}`,
-        isCorrect,
-      });
+      if (mode === 'exam') {
+        // Direkt zur nächsten Frage springen
+        if (currentQuestionIndex < questions.length - 1) {
+          setCurrentQuestionIndex((prev) => prev + 1);
+        } else {
+          // Letzte Frage erreicht -> Zusammenfassung anzeigen
+          setShowSummary(true);
+        }
+      } else {
+        // Feedback für andere Modi anzeigen
+        setFeedback({
+          message: isCorrect ? 'Richtig! 🎉' : `Falsch. Die richtige Antwort ist: ${correctOption}`,
+          isCorrect,
+        });
+        setIsFeedbackVisible(true);
+      }
 
       // Abzeichenprüfung
       const updatedPoints = points + (isCorrect ? 10 : 0);
@@ -120,7 +138,6 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
 
     
          if (currentQuestionIndex < questions.length - 1) {
-           setCurrentQuestionIndex((prev) => prev + 1);
         } else if (mode === 'exam') {
           setShowSummary(true); 
         } else {
@@ -130,6 +147,17 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
       console.error('Error updating question status:', err);
     }
   };
+
+  const handleNextQuestion = () => {
+    setFeedback(null);
+    setIsFeedbackVisible(false); // Feedback ausblenden
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+    } else {
+      handleModeCompletion(mode);
+    }
+  };
+
 
   const handleModeCompletion = async (completeMode: string) => {
     let bonusPoints = 0;
@@ -156,10 +184,6 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
       setBadges((prev) => [...prev, newBadge]);
       alert(`Neues Abzeichen: ${newBadge}!`);
     }
-
-    navigate(`/courses/${courseId}`, {
-      state: { message },
-    });
   };
 
   const checkAndAssignBadge = async (userId: string, courseId: string, points: number) => {
@@ -180,7 +204,35 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
     return newBadge;
   };
 
-  return { questions, currentQuestionIndex, feedback, handleAnswer, timeLeft, points, badges, correctAnswersCount, showSummary, loadingQuestions, handleModeCompletion };
+  return { questions, currentQuestionIndex, feedback, handleAnswer, timeLeft, points, badges, correctAnswersCount, showSummary, loadingQuestions, handleModeCompletion, handleNextQuestion, getFormattedQuestion};
 };
+
+const parseQuestionText = (text: string): string[] => {
+  // Trenne den Text nach Satzende (`.`, `?`, `!`) und behalte Aufzählungen zusammen
+  const parts = text.split(/(?<=\.)|(?<=\?)|(?<=!)\s+(?=\d+\.|[A-Z]\.)|(?<=\d\.|[A-Z]\.)\s+/g).filter((part) => part.trim() !== '');
+
+  const structuredParts: string[] = [];
+  let tempPart = '';
+
+  parts.forEach((part) => {
+    if (/^\d+\./.test(part) || /^[A-Z]\./.test(part)) {
+      // Wenn es eine nummerierte oder alphabetische Aufzählung ist
+      tempPart += ` ${part}`;
+    } else {
+      // Füge die Aufzählung hinzu, wenn ein Satz kommt
+      if (tempPart) {
+        structuredParts.push(tempPart.trim());
+        tempPart = '';
+      }
+      structuredParts.push(part.trim());
+    }
+  });
+
+  // Letzte Aufzählung hinzufügen, falls vorhanden
+  if (tempPart) structuredParts.push(tempPart.trim());
+
+  return structuredParts;
+};
+
 
 export default useLearningMode;

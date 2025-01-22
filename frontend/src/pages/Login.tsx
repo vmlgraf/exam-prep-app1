@@ -65,28 +65,38 @@ function Login() {
 
   return (
     <div className="login-container">
-      <h2>Anmelden</h2>
-      {error && <p className="error-text">{error}</p>}
-      <form onSubmit={handleLogin} autoComplete='on'>
-      <input
-        type="email"
-        name='email'
-        placeholder="E-Mail"
-        onChange={(e) => setEmail(e.target.value)}
-        value={email}
-        autoComplete='email'
-      />
-      <input
-        type="password"
-        name='password'
-        placeholder="Passwort"
-        onChange={(e) => setPassword(e.target.value)}
-        value={password}
-        autoComplete='current-password'
-      />
-      <button onClick={handleLogin} className="login-button">Anmelden</button>
-    </form>
-    <button onClick={handleGoogleLogin} className="oauth-button">Mit Google anmelden</button>
+      <div className='login-card'>
+        <h2>Willkommen zurück!</h2>
+        {error && <p className="error-text">{error}</p>}
+        <form onSubmit={handleLogin} autoComplete='on'>
+        <div className="form-group">
+            <label htmlFor="email">E-Mail</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="E-Mail"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Passwort</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Passwort"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
+              autoComplete='current-password'
+            />
+          </div>
+          <button onClick={handleLogin} className="login-button">Anmelden</button>
+          </form>
+          <div className='separator'>oder</div>
+          <button onClick={handleGoogleLogin} className="google-login-button">
+          Mit Google Anmelden
+          </button>
+        </div>
     </div>
   );
 }

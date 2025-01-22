@@ -40,7 +40,7 @@ function Courses() {
 
   return (
     <div className="courses-container">
-      <h2 className="courses-title">Available Courses</h2>
+      <h2 className="courses-title">Verfügbare Kurse</h2>
       <div className="courses-grid">
         {courses.map((course) => (
           <div
@@ -49,7 +49,22 @@ function Courses() {
             onClick={() => handleCourseClick(course.id)}
           >
             <h3>{course.title}</h3>
-            <p>{course.description}</p>
+            <p className="course-description">
+              {course.description.length > 120
+                ? `${course.description.substring(0, 120)}...`
+                : course.description}
+            </p>
+            {course.description.length > 120 && (
+              <button
+                className="read-more-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/courses/${course.id}`);
+                }}
+              >
+                Mehr erfahren
+              </button>
+            )}
           </div>
         ))}
       </div>

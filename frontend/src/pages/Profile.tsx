@@ -47,8 +47,6 @@ function Profile() {
         const userProfile = await getProfile(userId);
         const courses = await fetchUserCourseStats(userId);
 
-        console.log('Fetched Course Stats:', courses);
-
         setProfile(userProfile);
         setCourseStats(courses);
       } catch (err) {
@@ -77,7 +75,12 @@ function Profile() {
   return (
     <div className="profile-container">
       {profile ? (
-        <div>
+        <div className="profile-header">
+        <img
+          src={`https://ui-avatars.com/api/?name=${profile.name || 'Benutzer'}&background=6c1d5f&color=fff&size=128`}
+          alt="Avatar"
+          className="profile-avatar"
+        />
           <h2>Willkommen, {profile.name || 'Benutzer'}</h2>
           <p>E-Mail: {profile.email}</p>
           {profile.birthday && (
@@ -107,7 +110,7 @@ function Profile() {
       </div>
 
       <div className="logout-container">
-        <button onClick={handleLogout} className="logout-button">
+        <button onClick={handleLogout} className="signout-button">
           Abmelden
         </button>
       </div>

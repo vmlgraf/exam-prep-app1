@@ -22,16 +22,19 @@ function Header() {
 
   const shouldShowAuthButton = !isAuthenticated;
   const isLoginPage = location.pathname === '/login';
+  const isHomePage = location.pathname === '/';
 
   return (
     <header className="header">
-      <div className="header-title">
-        <h1>Exam Prep</h1>
+      <div className={`header-container ${isHomePage ? 'large-header' : 'small-header'}`}>
+        <div className='logo'>
+          <h1 className={`title ${isHomePage ? 'home-title' : 'page-title'}`}>Prüfungsvorbereitungs App</h1>
+        </div>
       </div>
-      <nav className="header-nav">
+      <nav className="navigation">
         <ul>
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/">Willkommen</Link>
           </li>
           <li>
             <Link to="/courses">Kurse</Link>
@@ -53,7 +56,7 @@ function Header() {
       {shouldShowAuthButton && (
         <div className="auth-button">
           <Link to={isLoginPage ? '/register' : '/login'}>
-            <button className='button-register'>
+            <button className='button-auth'>
               {isLoginPage ? 'Registrieren' : 'Anmelden'}
             </button>
           </Link>

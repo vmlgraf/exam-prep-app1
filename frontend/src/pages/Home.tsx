@@ -4,11 +4,15 @@ import '../styles/Home.css';
 function Home() {
   return (
     <div className="home-container">
-      <h1>Welcome to Exam Prep</h1>
-      <p>Your journey to exam success starts here.</p>
+      <div className='home-content'>
+        <h1>Willkommen zur Prüfungsvorbereitungs App</h1>
+        <p>Deine Reise zum Prüfungserfolg beginnt hier.</p>
+      </div>
+      <div className='button-wrapper'>
       <Link to="/courses">
-        <button className="cta-button">Explore Courses</button>
+        <button className="explore-button">Kurse Erkundigen</button>
       </Link>
+      </div>
     </div>
   );
 }

@@ -90,4 +90,25 @@ router.get('/courses/:courseId/stats', async (req, res) => {
   }
 });
 
+// Delete a specific question
+router.delete('/courses/:courseId/questions/:questionId', async (req, res) => {
+  const { courseId, questionId } = req.params;
+
+  try {
+    const questionRef = db.collection('courses').doc(courseId).collection('questions').doc(questionId);
+
+    const questionSnapshot = await questionRef.get();
+    if (!questionSnapshot.exists) {
+      res.status(404).json({ error: 'Question not found.' });
+      return;
+    }
+
+    await questionRef.delete();
+    res.status(200).json({ message: 'Question deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting question:', error);
+    res.status(500).json({ error: 'Failed to delete question.' });
+  }
+});
+
 export default router;

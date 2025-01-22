@@ -32,24 +32,42 @@
   font-size: 1rem;
 }
 
-.admin-button {
-  display: block;
-  background-color: #3498db;
-  color: #fff;
-  padding: 0.75rem 1rem;
+/* Einheitliches Button-Styling */
+.button {
+  background-color: #6c1d5f; /* Primärfarbe */
+  color: #ffffff;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  border-radius: 6px;
   font-size: 1rem;
+  cursor: pointer;
   text-align: center;
-  margin: 0 auto;
-  transition: background-color 0.3s;
+  text-decoration: none; /* Entfernt die Standard-Link-Styling */
+  display: inline-block;
+  margin: 0.5rem 0.5rem 0 0;
+  transition: all 0.3s ease-in-out;
+  line-height: 1; /* Verhindert unterschiedliche Höhen */
+  width: auto; /* Gleiche Breite für alle */
+  box-sizing: border-box; /* Verhindert Layout-Verschiebungen */
 }
 
-.admin-button:hover {
-  background-color: #2980b9;
+.button:hover {
+  background-color: #531348; /* Abgedunkelte Hover-Farbe */
+  transform: translateY(-2px); /* Leichter Schwebe-Effekt */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Schatten beim Hover */
 }
 
+/* Delete-Button spezifisch */
+.delete-button {
+  background-color: #e63946;
+}
+
+.delete-button:hover {
+  background-color: #c62f3a;
+}
+
+
+/* Listen-Styling */
 .course-list {
   list-style: none;
   padding: 0;
@@ -57,23 +75,24 @@
 }
 
 .course-item {
-  background: #f9f9f9;
-  border: 1px solid #ddd;
+  background: #fefefe;
+  border: 1px solid #e0e0e0;
   padding: 1rem;
-  border-radius: 5px;
+  border-radius: 8px;
   margin-bottom: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.delete-button {
-  background-color: #ff4d4d;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
+.course-item h4 {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  color: #6c1d5f;
+  font-weight: 600;
 }
 
-.delete-button:hover {
-  background-color: #e60000;
+.course-item p {
+  margin: 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1rem;
+  line-height: 1.5;
 }

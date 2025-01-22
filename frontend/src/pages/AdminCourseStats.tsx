@@ -41,7 +41,7 @@ function AdminCourseStats() {
   }, [courseId]);
 
   if (error) return <p className="error-text">{error}</p>;
-  if (!stats) return <p>Statistiken werden geladen...</p>;
+  if (!stats) return <p className="error-text">Statistiken werden geladen...</p>;
 
   return (
     <div className="course-stats-container">

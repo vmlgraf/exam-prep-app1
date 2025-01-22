@@ -14,8 +14,11 @@ import { CourseProvider } from './context/CourseContext';
 import AdminCourseManagement from './pages/AdminCourseManagement';
 import AdminCourseStats from './pages/AdminCourseStats';
 import './styles/GlobalStyles.css';
+import { useState } from 'react';
 
 function App() {
+  const [loading, setLoading] = useState(false);
+
   return (
     <div className="App">
       <Header />
@@ -29,15 +32,16 @@ function App() {
             <Route path="/courses/:courseId/modes" element={<LearningMode />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/edit/:courseId" element={<AdminCourseManagement />} />
+            <Route 
+              path="/profile" element={<Profile/>} />
+            <Route path="/admin" element={<Admin setLoading={setLoading} />} />
+            <Route path="/admin/edit/:courseId" element={<AdminCourseManagement/>} />
             <Route path="/admin/courses/:courseId/stats" element={<AdminCourseStats/>} />
           </Routes>
           </CourseProvider>
         </QuestionProvider>
       </main>
-      <Footer />
+      {!loading && <Footer />}
     </div>
   );
 }

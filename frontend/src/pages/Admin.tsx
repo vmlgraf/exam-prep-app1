@@ -10,7 +10,11 @@ interface Course {
   description: string;
 }
 
-function Admin() {
+interface AdminProps {
+  setLoading: (loading: boolean) => void;
+}
+
+function Admin({setLoading}: AdminProps) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [newCourseTitle, setNewCourseTitle] = useState('');
   const [newCourseDescription, setNewCourseDescription] = useState('');
@@ -18,16 +22,19 @@ function Admin() {
 
   useEffect(() => {
     const loadCourses = async () => {
+      setLoading(true);
       try {
         const courseList = await fetchCourses();
         setCourses(courseList);
       } catch (error) {
         console.error('Failed to fetch courses:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadCourses();
-  }, []);
+  }, [setLoading]);
 
   const handleAddCourse = async () => {
     if (!newCourseTitle.trim() || !newCourseDescription.trim()) {
@@ -68,22 +75,22 @@ function Admin() {
 
   return (
     <div className="admin-container">
-      <h2>Admin Panel</h2>
+      <h2>Admin Seite</h2>
       <div className="admin-section">
-        <h3>Add New Course</h3>
+        <h3>Neuer Kurs hinzufügen</h3>
         <input
           type="text"
-          placeholder="Course Title"
+          placeholder="Kurs Titel"
           value={newCourseTitle}
           onChange={(e) => setNewCourseTitle(e.target.value)}
         />
         <textarea
-          placeholder="Course Description"
+          placeholder="Kurs Beschreibung"
           value={newCourseDescription}
           onChange={(e) => setNewCourseDescription(e.target.value)}
         />
         <button className="admin-button" onClick={handleAddCourse}>
-          Add Course
+          Kurs hinzufügen
         </button>
       </div>
       <div className="admin-section">
@@ -93,9 +100,9 @@ function Admin() {
             <li key={course.id} className="course-item">
               <h4>{course.title}</h4>
               <p>{course.description}</p>
-              <button onClick={() => handleEditCourse(course.id)}>Edit</button>
-              <button className='delete-button' onClick={() => handleDeleteCourse(course.id)}>Löschen</button>
-              <Link to={`/admin/courses/${course.id}/stats`}>Statistiken anzeigen</Link>
+              <button onClick={() => handleEditCourse(course.id)} className="button">Bearbeiten</button>
+              <button className="button delete-button" onClick={() => handleDeleteCourse(course.id)}>Löschen</button>
+              <Link to={`/admin/courses/${course.id}/stats`} className="button">Statistiken anzeigen</Link>
             </li>
           ))}
         </ul>

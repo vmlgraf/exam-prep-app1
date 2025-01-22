@@ -1,29 +1,108 @@
+/* Login-Container */
 .login-container {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  height: 100vh;
+  background: #f4f4f9;
+}
+
+.login-card {
+  background: #fff;
   padding: 2rem;
-  background: #ffffff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  margin: 2rem auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
   max-width: 400px;
+  width: 100%;
 }
 
-.login-container input {
+h2 {
+  margin-bottom: 1.5rem;
+  color: #6c1d5f;
+  font-size: 1.8rem;
+}
+
+/* Fehler-Text */
+.error-text {
+  color: #e74c3c;
   margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
+/* Formular */
+.form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: #6c1d5f;
+  outline: none;
+}
+
+/* Login-Button */
 .login-button {
-  background-color: #3498db;
+  background-color: #6c1d5f;
   color: #fff;
   padding: 0.75rem 1rem;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 .login-button:hover {
-  background-color: #2980b9;
+  background-color: #5a174c;
+}
+
+/* Separator */
+.separator {
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+/* Google-Login-Button */
+.google-login-button {
+  background-color: #4285F4; /* Neutrale Google-Farbe */
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin: 0 auto; /* Zentriert den Button */
+}
+
+.google-login-button:hover {
+  background-color: #357ae8; /* Hover-Farbe */
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
 }

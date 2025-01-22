@@ -22,3 +22,13 @@ export const evaluateAnswer = (selectedAnswer: string, correctAnswer: string, op
   const correctAnswerIndex = correctAnswer.charCodeAt(0) - 65; // 'A' = 0, 'B' = 1, etc.
   return options[correctAnswerIndex] === selectedAnswer;
 };
+
+export const deleteQuestion = async (courseId: string, questionId: string) => {
+  try {
+    await api.delete(`/courses/${courseId}/questions/${questionId}`);
+    console.log('Question deleted successfully.');
+  } catch (error) {
+    console.error('Error deleting question:', error);
+    throw error;
+  }
+};

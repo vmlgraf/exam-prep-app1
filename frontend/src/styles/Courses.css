@@ -26,6 +26,10 @@
   text-align: center;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  height: 280px; /* Einheitliche Höhe */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .course-card:hover {
@@ -40,6 +44,24 @@
 }
 
 .course-card p {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #7f8c8d;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.read-more-button {
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.read-more-button:hover {
+  background-color: #1f669d;
 }
