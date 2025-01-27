@@ -3,8 +3,20 @@ import api from './api';
 import { db } from '../firebaseConfig';
 
 // Benutzer registrieren
-export const registerUser = async (email: string, password: string, name: string, birthday: string) => {
-  return api.post('/users/register', { email, password, name, birthday });
+export const registerUser = async (email: string, password: string, name: string) => {
+  try {
+    return await api.post('/users/register', { email, password, name });
+  } catch (error: unknown) {
+    // Fehler typisieren
+    if (error instanceof Error) {
+      const axiosError = error as any; // Falls du axios verwendest
+      console.error('Error during registration:', axiosError.response?.data || axiosError.message);
+      throw new Error(axiosError.response?.data?.error || 'Failed to register user.');
+    } else {
+      console.error('Unknown error:', error);
+      throw new Error('An unknown error occurred.');
+    }
+  }
 };
 
 // Benutzerprofil abrufen
@@ -42,7 +54,6 @@ export const createUserProfile = async (uid: string, email: string, name: string
     await setDoc(userDocRef, {
       email,
       name,
-      birthday: null,
       role: 'user',
       createdAt: new Date(),
     });

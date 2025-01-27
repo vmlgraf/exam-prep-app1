@@ -149,7 +149,7 @@ function AdminCourseManagement() {
           type="text"
           placeholder="Frage"
           value={newQuestion}
-          onChange={(e) => setNewQuestion(e.target.value)}
+          onChange={(e) => setNewQuestion(e.target.value)} maxLength={600}
         />
         {newOptions.map((opt, index) => (
           <input
@@ -162,14 +162,23 @@ function AdminCourseManagement() {
               updatedOptions[index] = e.target.value;
               setNewOptions(updatedOptions);
             }}
+            maxLength={200}
           />
         ))}
-        <input
-          type="text"
-          placeholder="Korrekte Antwort"
+        <select
           value={newCorrectAnswer}
           onChange={(e) => setNewCorrectAnswer(e.target.value)}
-        />
+          className="dropdown"
+        >
+          <option value="" disabled>
+            Wähle die korrekte Antwort
+          </option>
+          {newOptions.map((_, index) => (
+            <option key={index} value={String.fromCharCode(65 + index)}>
+              {`Option ${index + 1}`}
+            </option>
+          ))}
+        </select>
         <button onClick={handleAddQuestion}>Frage hinzufügen</button>
       </section>
 

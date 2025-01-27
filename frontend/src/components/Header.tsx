@@ -1,11 +1,18 @@
-import { Link, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { useAuth } from '../hooks/useAuth'; // Auth-Hook importieren
-import { checkIfAdmin } from '../services/userService'; // Admin-Prüfung
-import './styles/Header.css';
+import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useAuth } from "../hooks/useAuth"; // Auth-Hook importieren
+import { checkIfAdmin } from "../services/userService"; // Admin-Prüfung
+import { Home } from "lucide-react"; // Lucide-Icons importieren
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuLink,
+} from "./ui/navigation-menu";
+import "./styles/Header.css";
 
 function Header() {
-  const { isAuthenticated, userId } = useAuth(); // Authentifizierungsstatus und User-ID abrufen
+  const { isAuthenticated, userId } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
 
@@ -20,48 +27,68 @@ function Header() {
     fetchAdminStatus();
   }, [userId]);
 
+  const isLoginPage = location.pathname === "/login";
   const shouldShowAuthButton = !isAuthenticated;
-  const isLoginPage = location.pathname === '/login';
-  const isHomePage = location.pathname === '/';
 
   return (
     <header className="header">
-      <div className={`header-container ${isHomePage ? 'large-header' : 'small-header'}`}>
-        <div className='logo'>
-          <h1 className={`title ${isHomePage ? 'home-title' : 'page-title'}`}>Prüfungsvorbereitungs App</h1>
+      <div className="header-container">
+        <div className="title">
+          <h1>Prüfungsvorbereitungs App</h1>
         </div>
+
+        <NavigationMenu className="navigation">
+          <NavigationMenuList>
+            {/* Willkommen */}
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link to="/" className="navigation-link">
+                  <Home className="icon" /> Willkommen
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            {/* Kurse */}
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link to="/courses" className="navigation-link">
+                  Kurse
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            {/* Profil */}
+            {isAuthenticated && (
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link to="/profile" className="navigation-link">
+                    Profil
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            )}
+
+            {/* Admin */}
+            {isAuthenticated && isAdmin && (
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link to="/admin" className="navigation-link">
+                    Admin
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            )}
+          </NavigationMenuList>
+        </NavigationMenu>
+
+        {shouldShowAuthButton && (
+          <div className="auth-button">
+            <Link to={isLoginPage ? "/register" : "/login"}>
+              <button className="button-auth">{isLoginPage ? "Registrieren" : "Anmelden"}</button>
+            </Link>
+          </div>
+        )}
       </div>
-      <nav className="navigation">
-        <ul>
-          <li>
-            <Link to="/">Willkommen</Link>
-          </li>
-          <li>
-            <Link to="/courses">Kurse</Link>
-          </li>
-          {isAuthenticated && (
-            <>
-              <li>
-                <Link to="/profile">Profil</Link>
-              </li>
-              {isAdmin && (
-                <li>
-                  <Link to="/admin">Admin</Link>
-                </li>
-              )}
-            </>
-          )}
-        </ul>
-      </nav>
-      {shouldShowAuthButton && (
-        <div className="auth-button">
-          <Link to={isLoginPage ? '/register' : '/login'}>
-            <button className='button-auth'>
-              {isLoginPage ? 'Registrieren' : 'Anmelden'}
-            </button>
-          </Link>
-        </div>
-      )}
     </header>
   );
 }

@@ -2,14 +2,18 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchQuestions, updateQuestionStatus } from '../services/questionService';
 import { updatePoints, addBadge } from '../services/userStatsService';
+import { saveQuestion, fetchSavedQuestions } from '../services/questionService';
+import { removeSavedQuestion } from '../services/questionService';
+import { toast } from 'sonner';
 
 interface Question {
   id: string;
   question: string;
   options: string[];
   correctAnswer: string;
-  imageUrl?: string;
+  imageBase64?: string;
   lastStatus?: 'correct' | 'incorrect';
+  toRemove?: boolean; 
 }
 
 const useLearningMode = (courseId: string, mode: string, userId: string) => {
@@ -25,6 +29,19 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
   const [, setIsFeedbackVisible] = useState(false);
   const navigate = useNavigate();
 
+  const saveCurrentQuestion = async () => {
+    const currentQuestion = questions[currentQuestionIndex];
+    try {
+      await saveQuestion(courseId, currentQuestion.id);
+      toast('Frage wurde gespeichert!', {
+        description: 'Diese Frage wird im Wiederholungsmodus verfügbar sein.',
+      });
+    } catch (error) {
+      console.error('Error saving question:', error);
+      toast.error('Fehler beim Speichern der Frage.');
+    }
+  };
+
   useEffect(() => {
     const loadQuestions = async () => {
       if (!courseId) return;
@@ -36,10 +53,18 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
           const incorrectQuestions = allQuestions.filter(
             (question: Question) => question.lastStatus === 'incorrect'
           );
+          const savedQuestions = await fetchSavedQuestions(courseId);
+          const uniqueQuestions = [
+            ...incorrectQuestions,
+            ...savedQuestions.filter(
+              (savedQuestion: Question) =>
+                !incorrectQuestions.some((q: Question) => q.id === savedQuestion.id)
+            ),
+          ];
 
-          setQuestions(incorrectQuestions);
+          setQuestions(uniqueQuestions);
 
-          if (incorrectQuestions.length === 0) {
+          if (uniqueQuestions.length === 0) {
             handleModeCompletion('repeat');
             return;
           }
@@ -62,10 +87,22 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
     loadQuestions();
   }, [courseId, mode]);
 
-  const getFormattedQuestion = (): string[] => {
-    if (!questions[currentQuestionIndex]) return [];
-    return parseQuestionText(questions[currentQuestionIndex].question);
-  };
+  const getFormattedQuestion = (): string => {
+    const currentQuestion = questions[currentQuestionIndex];
+    if (!currentQuestion) return '';
+  
+    let formattedQuestion = currentQuestion.question;
+
+  // Falls ein Bild existiert, ersetze den Platzhalter durch das Base64-Bild
+  if (currentQuestion.imageBase64) {
+    formattedQuestion = formattedQuestion.replace(
+      '<img-placeholder>',
+      `<img src="${currentQuestion.imageBase64}" alt="Question Image" />`
+    );
+  }
+
+  return formattedQuestion;
+};
 
   useEffect(() => {
     if (mode === 'exam' && timeLeft > 0 && !showSummary) {
@@ -122,21 +159,18 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
       const newBadge = await checkAndAssignBadge(userId, courseId, updatedPoints);
       if (newBadge) {
         setBadges((prev) => [...prev, newBadge]);
-        alert(`Neues Abzeichen: ${newBadge}!`);
+        toast("Neues Abzeichen!", {
+          description: `Du hast das Abzeichen "${newBadge}" erhalten! 🎉`,
+        });
       }
 
-      if (mode === 'repeat' && isCorrect) {
-        const remainingQuestions = questions.map((q, index) => 
-          index === currentQuestionIndex ? null : q).filter(Boolean) as Question[];
-        setQuestions(remainingQuestions);
-
-        if (remainingQuestions.length === 0) {
-          handleModeCompletion('repeat');
-          return;
-        }
+      if (mode === 'repeat') {
+        setQuestions((prevQuestions) =>
+          prevQuestions.map((q, index) =>
+            index === currentQuestionIndex ? { ...q, lastStatus:  isCorrect ? 'correct':'incorrect'} : q )
+        );
       }
 
-    
          if (currentQuestionIndex < questions.length - 1) {
         } else if (mode === 'exam') {
           setShowSummary(true); 
@@ -149,14 +183,43 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
   };
 
   const handleNextQuestion = () => {
-    setFeedback(null);
-    setIsFeedbackVisible(false); // Feedback ausblenden
-    if (currentQuestionIndex < questions.length - 1) {
+    setFeedback(null); 
+    setIsFeedbackVisible(false); 
+    
+      if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      handleModeCompletion(mode);
-    }
-  };
+        handleModeCompletion(mode);
+      }
+    };
+
+    const handleRemoveSavedQuestion = async () => {
+      const currentQuestion = questions[currentQuestionIndex];
+      try {
+        await removeSavedQuestion(courseId, currentQuestion.id);
+        console.log("Toast wird ausgelöst!");
+        toast("Frage wurde entfernt!", {
+          description: "Diese Frage wird im Wiederholungsmodus nicht mehr angezeigt.",
+        });
+    
+        // Entferne die Frage lokal aus der Liste
+        setQuestions((prevQuestions) =>
+          prevQuestions.filter((q) => q.id !== currentQuestion.id)
+        );
+    
+        // Wenn keine Fragen mehr übrig sind, den Modus beenden
+        if (questions.length === 1) {
+          handleModeCompletion('repeat');
+        } else if (currentQuestionIndex >= questions.length - 1) {
+          setCurrentQuestionIndex(0); // Zurück zur ersten Frage, wenn die aktuelle entfernt wird
+        }
+      } catch (error) {
+        console.error('Error removing saved question:', error);
+        toast.error('Fehler beim Entfernen der Frage.');
+      }
+    };
+    
+  
 
 
   const handleModeCompletion = async (completeMode: string) => {
@@ -177,12 +240,18 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
     setPoints((prev) => prev + bonusPoints);
     await updatePoints(userId, courseId, bonusPoints);
 
+    toast('Modus abgeschlossen',{
+      description: message,
+    });
+
     // Abzeichenprüfung
     const updatedPoints = points + bonusPoints;
     const newBadge = await checkAndAssignBadge(userId, courseId, updatedPoints);
     if (newBadge) {
       setBadges((prev) => [...prev, newBadge]);
-      alert(`Neues Abzeichen: ${newBadge}!`);
+      toast("Neues Abzeichen!", {
+        description: `Du hast das Abzeichen "${newBadge}" erhalten! 🎉`,
+      });
     }
   };
 
@@ -204,34 +273,7 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
     return newBadge;
   };
 
-  return { questions, currentQuestionIndex, feedback, handleAnswer, timeLeft, points, badges, correctAnswersCount, showSummary, loadingQuestions, handleModeCompletion, handleNextQuestion, getFormattedQuestion};
-};
-
-const parseQuestionText = (text: string): string[] => {
-  // Trenne den Text nach Satzende (`.`, `?`, `!`) und behalte Aufzählungen zusammen
-  const parts = text.split(/(?<=\.)|(?<=\?)|(?<=!)\s+(?=\d+\.|[A-Z]\.)|(?<=\d\.|[A-Z]\.)\s+/g).filter((part) => part.trim() !== '');
-
-  const structuredParts: string[] = [];
-  let tempPart = '';
-
-  parts.forEach((part) => {
-    if (/^\d+\./.test(part) || /^[A-Z]\./.test(part)) {
-      // Wenn es eine nummerierte oder alphabetische Aufzählung ist
-      tempPart += ` ${part}`;
-    } else {
-      // Füge die Aufzählung hinzu, wenn ein Satz kommt
-      if (tempPart) {
-        structuredParts.push(tempPart.trim());
-        tempPart = '';
-      }
-      structuredParts.push(part.trim());
-    }
-  });
-
-  // Letzte Aufzählung hinzufügen, falls vorhanden
-  if (tempPart) structuredParts.push(tempPart.trim());
-
-  return structuredParts;
+  return { questions, currentQuestionIndex, feedback, handleAnswer, timeLeft, points, badges, correctAnswersCount, showSummary, loadingQuestions, handleModeCompletion, handleNextQuestion, getFormattedQuestion, saveCurrentQuestion, handleRemoveSavedQuestion};
 };
 
 

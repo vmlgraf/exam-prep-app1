@@ -1,7 +1,9 @@
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import useLearningMode from '../hooks/useLearningMode';
+import { AlertDialog, AlertDialogTitle, AlertDialogDescription } from '../components/ui/alert-dialog';
 import '../styles/LearningMode.css';
+import { Toaster } from '../components/ui/sonner';
 
 const LearningMode = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -20,8 +22,9 @@ const LearningMode = () => {
     correctAnswersCount,
     loadingQuestions ,
     getFormattedQuestion,
-    handleModeCompletion, 
-    handleNextQuestion 
+    handleNextQuestion,
+    saveCurrentQuestion,
+    handleRemoveSavedQuestion
   } = useLearningMode(courseId!, mode, userId!);
 
   if (loadingQuestions) {
@@ -30,28 +33,51 @@ const LearningMode = () => {
 
   if (!questions.length) {
     return mode === 'repeat' ? (
-      <p>Keine falsch beantworteten Fragen mehr vorhanden. 🎉</p>
+      <div className='no-questions-container'>
+        <AlertDialog>
+          <AlertDialogTitle>Keine Fragen übrig!</AlertDialogTitle>
+          <AlertDialogDescription>Keine falsch beantworteten Fragen mehr vorhanden. 🎉</AlertDialogDescription>
+        </AlertDialog>
+        <button
+          onClick={() => navigate(`/courses/${courseId}`)}
+          className="back-button bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700 mt-4"
+        >
+          Zurück zur Kurs Detail Seite
+        </button>
+      </div>
     ) : (
-      <p>Keine Fragen verfügbar.</p>
-    );
-  }
-
-  if (showSummary && mode === 'exam') {
-    return (
-      <div className="summary-container">
-        <h2>Prüfungsmodus abgeschlossen 🎉</h2>
-        <p>
-          Du hast {correctAnswersCount} von {questions.length} Fragen richtig beantwortet.
-        </p>
-        <button onClick={() => handleModeCompletion('exam')}>
+      <div className='no-questions-container'>
+        <AlertDialog>
+          <AlertDialogTitle>Keine Fragen verfügbar!</AlertDialogTitle>
+          <AlertDialogDescription>Es sind keine Fragen in diesem Kurs vorhanden. 😢</AlertDialogDescription>
+        </AlertDialog>
+        <button
+          onClick={() => navigate(`/courses/${courseId}`)}
+          className="back-button bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700 mt-4"
+        >
           Zurück zur Kurs Detail Seite
         </button>
       </div>
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const formattedSentences = getFormattedQuestion();
+  if (showSummary && mode === 'exam') {
+    return (
+      <div className="summary-container">
+        <AlertDialog>
+          <AlertDialogTitle>Prüfungsmodus abgeschlossen</AlertDialogTitle>
+          <AlertDialogDescription>
+            Du hast {correctAnswersCount} von {questions.length} Fragen richtig beantwortet.
+          </AlertDialogDescription>
+        </AlertDialog>
+        <button onClick={() => navigate(`/courses/${courseId}`)}>
+          Zurück zur Kurs Detail Seite
+        </button>
+      </div>
+    );
+  }
+
+  const currentQuestionHTML = getFormattedQuestion();
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -67,17 +93,12 @@ const LearningMode = () => {
         </div>
       )}
       <div className='question-box'>
-        <div className='question-text'>
-        {formattedSentences.map((sentence, index) => (
-            <p key={index} className="sentence-line">
-              {sentence}
-            </p>
-          ))}
+        <div className='question-text'
+        dangerouslySetInnerHTML={{ __html: currentQuestionHTML }} >
         </div>
-      {currentQuestion.imageUrl && (<img src={currentQuestion.imageUrl} alt="Question" className='question-image'/>)}
-      
+
       <div className="options-container">
-        {currentQuestion.options.map((option, index) => (
+      {questions[currentQuestionIndex].options.map((option, index) => (
           <button
             key={index}
             onClick={() => {
@@ -88,11 +109,29 @@ const LearningMode = () => {
           </button>
         ))}
       </div>
+      
       {feedback && mode!== 'exam' && (
         <div className="feedback-container">
           <p className={`feedback ${feedback.isCorrect ? 'correct' : 'incorrect'}`}>
             {feedback.message}
           </p>
+          {mode === 'practice' && (
+          <button
+          onClick={() => saveCurrentQuestion()}
+          className="save-question-button bg-green-600 text-white py-2 px-4 rounded-lg shadow hover:bg-green-700"
+          >
+          Frage speichern
+          </button>
+        )}
+        {mode === 'repeat' && (
+  <button
+    onClick={() => handleRemoveSavedQuestion()}
+    className="remove-saved-question-button bg-red-600 text-white py-2 px-4 rounded-lg shadow hover:bg-red-700"
+  >
+    Frage nicht mehr speichern
+  </button>
+)}
+
           {currentQuestionIndex < questions.length - 1 ? (
           <button onClick={handleNextQuestion} className="next-question-button">
           Nächste Frage
@@ -108,7 +147,8 @@ const LearningMode = () => {
         </div>
       )}
     </div>
-  </div>
+    <Toaster />
+ </div>
   );
 };
 

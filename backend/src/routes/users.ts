@@ -5,7 +5,7 @@ const router = Router();
 
 // Benutzer registrieren
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
-  const { email, password, name, birthday, role = 'user', enableMFA = false } = req.body;
+  const { email, password, name, role = 'user', enableMFA = false } = req.body;
 
   if (!email || !password) {
     res.status(400).json({ error: 'Email and password are required.' });
@@ -19,7 +19,6 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     await db.collection('users').doc(user.uid).set({
       email,
       name,
-      birthday,
       role,
       createdAt: new Date(),
     });

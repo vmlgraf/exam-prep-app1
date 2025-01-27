@@ -17,52 +17,42 @@
 
 /* Fragebox */
 .question-box {
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 700px;
-  padding: 20px;
-  text-align: center;
-}
-
-/* Frage-Text */
-.question-text {
-  font-size: 1.2rem; /* Einheitliche Schriftgröße */
-  line-height: 1.8; /* Mehr Platz zwischen den Zeilen */
-  color: #333333; /* Standard-Schriftfarbe */
-  margin-bottom: 20px;
-  text-align: left; /* Einheitlich linksbündig */
-}
-
-/* Jede Zeile der Frage */
-.question-line {
-  margin: 5px 0;
-  color: #333333;
-}
-
-.sentence-line {
-  margin: 5px 0;
-  font-size: 1rem;
+  padding: 1rem;
+  font-size: 1.2rem;
   line-height: 1.5;
 }
 
+.question-text {
+  white-space: pre-line; /* Zeilenumbrüche aus dem Text erhalten */
+}
 
-/* Letzte Zeile ("Wählen Sie...") */
-.question-last-line {
-  font-weight: bold;
-  margin-top: 10px;
-  color: #6c1d5f; /* Akzentfarbe für den letzten Satz */
+.question-text img {
+  display: block;
+  margin: 1rem auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.question-text table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.question-text table td,
+.question-text table th {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
   text-align: left;
 }
 
-/* Frage-Bild */
-.question-image {
-  max-width: 100%;
-  max-height: 300px;
-  margin: 10px auto;
-  border-radius: 8px;
+.question-text table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
 }
+
 
 /* Antwortoptionen */
 .options-container {
@@ -128,6 +118,7 @@
   background-color: #5a124e;
 }
 
+
 /* Responsives Design */
 @media (max-width: 768px) {
   .question-box {
@@ -144,5 +135,10 @@
 
   .next-question-button {
     font-size: 0.9rem;
+  }
+
+  .alert-dialog {
+    max-width: 90%;
+    padding: 15px;
   }
 }

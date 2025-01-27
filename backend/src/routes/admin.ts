@@ -51,7 +51,7 @@ router.post(
           question: question.question,
           options: question.options,
           correctAnswer: question.correctAnswer,
-          imageUrl: question.imageUrl || null,
+          imageUrl: question.imageBase64 || null,
         });
       });
 

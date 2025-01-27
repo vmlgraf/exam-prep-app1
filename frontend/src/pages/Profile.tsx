@@ -4,6 +4,7 @@ import { getProfile } from '../services/userService';
 import { useNavigate } from 'react-router-dom';
 import { fetchUserCourseStats } from '../services/userStatsService';
 import '../styles/Profile.css';
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 
 interface UserProfile {
   name?: string;
@@ -76,11 +77,14 @@ function Profile() {
     <div className="profile-container">
       {profile ? (
         <div className="profile-header">
-        <img
+          <Avatar>
+        <AvatarImage
           src={`https://ui-avatars.com/api/?name=${profile.name || 'Benutzer'}&background=6c1d5f&color=fff&size=128`}
           alt="Avatar"
           className="profile-avatar"
         />
+        <AvatarFallback>{profile.name?.[0] || "B"}</AvatarFallback>
+        </Avatar>
           <h2>Willkommen, {profile.name || 'Benutzer'}</h2>
           <p>E-Mail: {profile.email}</p>
           {profile.birthday && (

@@ -82,12 +82,12 @@ function Admin({setLoading}: AdminProps) {
           type="text"
           placeholder="Kurs Titel"
           value={newCourseTitle}
-          onChange={(e) => setNewCourseTitle(e.target.value)}
+          onChange={(e) => setNewCourseTitle(e.target.value)} maxLength={100}
         />
         <textarea
           placeholder="Kurs Beschreibung"
           value={newCourseDescription}
-          onChange={(e) => setNewCourseDescription(e.target.value)}
+          onChange={(e) => setNewCourseDescription(e.target.value)} maxLength={500}
         />
         <button className="admin-button" onClick={handleAddCourse}>
           Kurs hinzufügen

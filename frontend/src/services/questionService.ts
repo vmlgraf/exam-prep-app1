@@ -32,3 +32,18 @@ export const deleteQuestion = async (courseId: string, questionId: string) => {
     throw error;
   }
 };
+
+// Mark a question as saved
+export const saveQuestion = async (courseId: string, questionId: string) => {
+  await api.patch(`/courses/${courseId}/questions/${questionId}/save`);
+};
+
+// Fetch all saved questions
+export const fetchSavedQuestions = async (courseId: string) => {
+  const response = await api.get(`/courses/${courseId}/saved-questions`);
+  return response.data;
+};
+
+export const removeSavedQuestion = async (courseId: string, questionId: string) => {
+    await api.patch(`/courses/${courseId}/questions/${questionId}/unsave`); 
+};

@@ -53,9 +53,9 @@ function CourseDetail() {
           {isAuthenticated && (
             <div className="mode-selection">
             <h3>Select a learning mode:</h3>
-            <button onClick={() => handleModeSelection('practice')}>Practice Mode</button>
-            <button onClick={() => handleModeSelection('exam')}>Exam Mode</button>
-            <button onClick={() => handleModeSelection('repeat')}>Repeat Mode</button>
+            <button onClick={() => handleModeSelection('practice')}>Übungsmodus</button>
+            <button onClick={() => handleModeSelection('exam')}>Prüfungsmodus</button>
+            <button onClick={() => handleModeSelection('repeat')}>Wiederholungsmodus</button>
           </div>
           )}
         </>

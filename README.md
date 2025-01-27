@@ -14,10 +14,4 @@ cd ../backend
 npm install
 
 ## Run the Application
- ##Start the backend server:
-cd backend
-node index.js
-
-## In a new terminal window, start the frontend server:
-cd frontend
 npm start

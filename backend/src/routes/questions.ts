@@ -111,4 +111,72 @@ router.delete('/courses/:courseId/questions/:questionId', async (req, res) => {
   }
 });
 
+// Mark a question as saved
+router.patch('/courses/:courseId/questions/:questionId/save', async (req, res) => {
+  const { courseId, questionId } = req.params;
+
+  try {
+    const questionRef = db.collection('courses').doc(courseId).collection('questions').doc(questionId);
+
+    const questionSnapshot = await questionRef.get();
+    if (!questionSnapshot.exists) {
+      res.status(404).json({ error: 'Question not found.' });
+      return;
+    }
+
+    await questionRef.update({ isSaved: true }); // Markiere die Frage als gespeichert
+    res.status(200).json({ message: 'Question saved successfully.' });
+  } catch (error) {
+    console.error('Error saving question:', error);
+    res.status(500).json({ error: 'Failed to save question.' });
+  }
+});
+
+// Fetch all saved questions for a course
+router.get('/courses/:courseId/saved-questions', async (req, res) => {
+  const { courseId } = req.params;
+
+  try {
+    const questionsRef = db.collection('courses').doc(courseId).collection('questions');
+    const snapshot = await questionsRef.where('isSaved', '==', true).get();
+
+    if (snapshot.empty) {
+      res.status(404).json({ error: 'No saved questions found for this course.' });
+      return;
+    }
+
+    const questions = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.status(200).json(questions);
+  } catch (error) {
+    console.error('Error fetching saved questions:', error);
+    res.status(500).json({ error: 'Failed to fetch saved questions.' });
+  }
+});
+
+// Remove saved status from a question
+router.patch('/courses/:courseId/questions/:questionId/unsave', async (req, res) => {
+  const { courseId, questionId } = req.params;
+
+  try {
+    const questionRef = db.collection('courses').doc(courseId).collection('questions').doc(questionId);
+
+    const questionSnapshot = await questionRef.get();
+    if (!questionSnapshot.exists) {
+      res.status(404).json({ error: 'Question not found.' });
+      return;
+    }
+
+    await questionRef.update({ isSaved: false }); 
+    res.status(200).json({ message: 'Question unsaved successfully.' });
+  } catch (error) {
+    console.error('Error unsaving question:', error);
+    res.status(500).json({ error: 'Failed to unsave question.' });
+  }
+});
+
+
 export default router;
