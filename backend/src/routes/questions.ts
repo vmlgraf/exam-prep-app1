@@ -3,7 +3,7 @@ import { db } from '../adminConfig';
 
 const router = express.Router();
 
-// Fetch all questions for a specific course
+
 router.get('/courses/:courseId/questions', async (req, res): Promise<void> => {
   const { courseId } = req.params;
 
@@ -28,7 +28,7 @@ router.get('/courses/:courseId/questions', async (req, res): Promise<void> => {
   }
 });
 
-// Update the status of a question (correct/incorrect)
+
 router.patch('/courses/:courseId/questions/:questionId', async (req, res) => {
   const { courseId, questionId } = req.params;
   const { status } = req.body;
@@ -90,7 +90,7 @@ router.get('/courses/:courseId/stats', async (req, res) => {
   }
 });
 
-// Delete a specific question
+// Frage löschen
 router.delete('/courses/:courseId/questions/:questionId', async (req, res) => {
   const { courseId, questionId } = req.params;
 
@@ -111,7 +111,7 @@ router.delete('/courses/:courseId/questions/:questionId', async (req, res) => {
   }
 });
 
-// Mark a question as saved
+// fragen speichern
 router.patch('/courses/:courseId/questions/:questionId/save', async (req, res) => {
   const { courseId, questionId } = req.params;
 
@@ -132,7 +132,7 @@ router.patch('/courses/:courseId/questions/:questionId/save', async (req, res) =
   }
 });
 
-// Fetch all saved questions for a course
+// Gespeicherte Fragen abrufen
 router.get('/courses/:courseId/saved-questions', async (req, res) => {
   const { courseId } = req.params;
 
@@ -157,7 +157,7 @@ router.get('/courses/:courseId/saved-questions', async (req, res) => {
   }
 });
 
-// Remove saved status from a question
+// Frage als ungespeichert markieren
 router.patch('/courses/:courseId/questions/:questionId/unsave', async (req, res) => {
   const { courseId, questionId } = req.params;
 

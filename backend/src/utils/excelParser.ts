@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import { v4 as uuidv4 } from 'uuid';
-import { bucket } from '../adminConfig'; // Firebase Storage
+import { bucket } from '../adminConfig'; 
 import { error } from 'console';
 
 interface ParsedQuestion {
@@ -48,16 +48,16 @@ export const parseExcelFileWithImages = async (fileBuffer: Buffer): Promise<Pars
           imageBase64 = base64;
         
           
-        // Ersetze mehrere aufeinanderfolgende Zeilenumbrüche durch das Bild
+        
       const multilineBreaksRegex = /(\n\s*\n)/g;
       if (multilineBreaksRegex.test(questionText)) {
         questionText = questionText.replace(multilineBreaksRegex, `<img-placeholder>\n`);
       } else {
-        // Falls keine Zeilenumbrüche gefunden werden, hänge das Bild am Ende an
+        
         questionText += '\n<img-placeholder>';
       }
 
-      imageMap.delete(imageId); // Bild wurde zugeordnet
+      imageMap.delete(imageId); 
       break;
     }
   }
@@ -72,7 +72,7 @@ export const parseExcelFileWithImages = async (fileBuffer: Buffer): Promise<Pars
       
 
       if (!questionText || options.length !== 4 || !['A', 'B', 'C', 'D'].includes(correctAnswer)) {
-        // console.warn(`Skipping invalid row ${i}:`, { questionText, options, correctAnswer });
+        
         continue;
       }
     

@@ -62,7 +62,7 @@ router.get('/:courseId', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// Kurs bearbeiten (PATCH)
+// Kurs bearbeiten
 router.patch('/:courseId', async (req: Request, res: Response): Promise<void> => {
   const { courseId } = req.params;
   const { title, description } = req.body;

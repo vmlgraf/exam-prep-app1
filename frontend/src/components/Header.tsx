@@ -1,8 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useAuth } from "../hooks/useAuth"; // Auth-Hook importieren
-import { checkIfAdmin } from "../services/userService"; // Admin-Prüfung
-import { Home } from "lucide-react"; // Lucide-Icons importieren
+import { useAuth } from "../hooks/useAuth"; 
+import { checkIfAdmin } from "../services/userService"; 
+import { Home } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -39,7 +39,7 @@ function Header() {
 
         <NavigationMenu className="navigation">
           <NavigationMenuList>
-            {/* Willkommen */}
+            
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <Link to="/" className="navigation-link">
@@ -48,7 +48,6 @@ function Header() {
               </NavigationMenuLink>
             </NavigationMenuItem>
 
-            {/* Kurse */}
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <Link to="/courses" className="navigation-link">
@@ -57,7 +56,6 @@ function Header() {
               </NavigationMenuLink>
             </NavigationMenuItem>
 
-            {/* Profil */}
             {isAuthenticated && (
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
@@ -68,7 +66,6 @@ function Header() {
               </NavigationMenuItem>
             )}
 
-            {/* Admin */}
             {isAuthenticated && isAdmin && (
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>

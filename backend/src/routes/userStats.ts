@@ -3,7 +3,7 @@ import { db } from '../adminConfig';
 
 const router = Router();
 
-// Fetch user stats (points, badges, etc.)
+// Benutzerstatistiken für Kurse abrufen
 router.get('/users/:userId/courses', async (req, res): Promise<void> => {
     const { userId } = req.params;
   
@@ -58,7 +58,7 @@ router.get('/users/:userId/courses', async (req, res): Promise<void> => {
   
   
   
-// Add points to a user's course
+// Punkte für einen Kurs eines Benutzers aktualisieren
 router.post('/user/:userId/courses/:courseId/points', async (req, res): Promise<void> => {
   const { userId, courseId } = req.params;
   const { points } = req.body;
@@ -82,7 +82,7 @@ router.post('/user/:userId/courses/:courseId/points', async (req, res): Promise<
   }
 });
 
-// Add a badge to a user's course
+// Benutzerabzeichen für einen Kurs hinzufügen
 router.post('/user/:userId/courses/:courseId/badges', async (req, res): Promise<void> => {
   const { userId, courseId } = req.params;
   const { badge } = req.body;

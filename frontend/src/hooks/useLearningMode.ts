@@ -138,15 +138,15 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
       }
 
       if (mode === 'exam') {
-        // Direkt zur nächsten Frage springen
+        
         if (currentQuestionIndex < questions.length - 1) {
           setCurrentQuestionIndex((prev) => prev + 1);
         } else {
-          // Letzte Frage erreicht -> Zusammenfassung anzeigen
+          
           setShowSummary(true);
         }
       } else {
-        // Feedback für andere Modi anzeigen
+        
         setFeedback({
           message: isCorrect ? 'Richtig! 🎉' : `Falsch. Die richtige Antwort ist: ${correctOption}`,
           isCorrect,
@@ -202,7 +202,7 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
           description: "Diese Frage wird im Wiederholungsmodus nicht mehr angezeigt.",
         });
     
-        // Entferne die Frage lokal aus der Liste
+        
         setQuestions((prevQuestions) =>
           prevQuestions.filter((q) => q.id !== currentQuestion.id)
         );
@@ -211,7 +211,7 @@ const useLearningMode = (courseId: string, mode: string, userId: string) => {
         if (questions.length === 1) {
           handleModeCompletion('repeat');
         } else if (currentQuestionIndex >= questions.length - 1) {
-          setCurrentQuestionIndex(0); // Zurück zur ersten Frage, wenn die aktuelle entfernt wird
+          setCurrentQuestionIndex(0); 
         }
       } catch (error) {
         console.error('Error removing saved question:', error);

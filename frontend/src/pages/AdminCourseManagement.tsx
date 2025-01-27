@@ -10,7 +10,7 @@ interface Question {
   question: string;
   options: string[];
   correctAnswer: string;
-  imageUrl?: string; // URL des Bildes
+  imageUrl?: string; 
 }
 
 function AdminCourseManagement() {
@@ -29,7 +29,6 @@ function AdminCourseManagement() {
       if (!courseId) return;
 
       try {
-        // Kursdetails abrufen
         const courseRef = doc(db, 'courses', courseId);
         const courseSnap = await getDoc(courseRef);
 

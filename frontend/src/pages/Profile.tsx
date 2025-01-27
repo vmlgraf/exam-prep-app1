@@ -30,10 +30,10 @@ function Profile() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoading) return; // Warten, bis der Auth-Status geladen ist
+    if (isLoading) return; 
 
     if (!isAuthenticated) {
-      navigate('/login'); // Weiterleitung zur Login-Seite, wenn nicht eingeloggt
+      navigate('/login'); 
     }
   }, [isAuthenticated, isLoading, navigate]);
 
@@ -64,7 +64,7 @@ function Profile() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login'); // Weiterleitung zur Login-Seite nach Abmeldung
+      navigate('/login');
     } catch (err) {
       console.error('Fehler beim Abmelden:', err);
     }

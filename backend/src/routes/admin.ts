@@ -24,10 +24,10 @@ router.post(
     try {
       const buffer = file.buffer;
 
-      // Parse Excel-Datei mit Bildern
+      
       const questions = await parseExcelFileWithImages(buffer);
 
-      // Validierung: Jede Frage benötigt mindestens 4 Optionen und eine richtige Antwort
+      
       const invalidQuestions = questions.filter(
         (q) => !q.question || q.options.length < 4 || !q.correctAnswer
       );
@@ -39,7 +39,7 @@ router.post(
         return;
       }
 
-      // Firestore-Verweise
+      
       const courseRef = db.collection('courses').doc(courseId);
       const questionsRef = courseRef.collection('questions');
 

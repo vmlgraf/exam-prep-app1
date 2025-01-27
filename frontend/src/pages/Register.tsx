@@ -19,7 +19,7 @@ function Register() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const navigate = useNavigate(); // Hinzufügen
+  const navigate = useNavigate();
 
   const validateEmail = (email: string) => {
     return /\S+@\S+\.\S+/.test(email);

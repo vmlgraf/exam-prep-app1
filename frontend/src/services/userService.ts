@@ -7,7 +7,7 @@ export const registerUser = async (email: string, password: string, name: string
   try {
     return await api.post('/users/register', { email, password, name });
   } catch (error: unknown) {
-    // Fehler typisieren
+    
     if (error instanceof Error) {
       const axiosError = error as any; // Falls du axios verwendest
       console.error('Error during registration:', axiosError.response?.data || axiosError.message);

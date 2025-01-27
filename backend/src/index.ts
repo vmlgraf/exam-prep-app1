@@ -3,8 +3,8 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import * as admin from 'firebase-admin';
 import path from 'path';
-import helmet from 'helmet'; // Sicherheitsheaders
-import morgan from 'morgan'; // Logging
+import helmet from 'helmet'; 
+import morgan from 'morgan'; 
 import adminRoutes from './routes/admin';
 import coursesRoutes from './routes/courses';
 import questionsRoutes from './routes/questions';

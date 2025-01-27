@@ -17,7 +17,6 @@ router.post('/upload-questions/:courseId', upload.single('file'), async (req, re
   try {
     const fileBuffer = req.file.buffer;
 
-    // Parse das Excel-File
     const questions = await parseExcelFileWithImages(fileBuffer);
 
     if (!questions || questions.length === 0) {
@@ -36,12 +35,12 @@ router.post('/upload-questions/:courseId', upload.single('file'), async (req, re
         throw new Error('Invalid question format in the file.');
       }
 
-      // Speichere die Frage in Firestore (inkl. Base64-Bild)
+      
       return questionsRef.add({
         question: questionText,
         options,
         correctAnswer,
-        imageBase64, // Speichere das Bild direkt als Base64
+        imageBase64, 
       });
     });
 
